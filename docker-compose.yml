@@ -1,0 +1,19 @@
+services:
+  flutter:
+    image: ghcr.io/cirruslabs/flutter:stable
+    container_name: flutter_dev
+    working_dir: /app
+    network_mode: host
+    volumes:
+      - .:/app
+      - flutter_pub_cache:/root/.pub-cache
+      - flutter_gradle_cache:/root/.gradle
+      - flutter_android_sdk:/opt/android-sdk-linux
+    stdin_open: true
+    tty: true
+    command: bash
+
+volumes:
+  flutter_pub_cache:
+  flutter_gradle_cache:
+  flutter_android_sdk:
