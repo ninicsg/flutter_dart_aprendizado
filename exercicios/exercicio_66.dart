@@ -1,3 +1,5 @@
+// 66 - Criar um programa que analisa pedidos de produtos usando listas relacionadas de produtos, preços, estoques e quantidades pedidas, identificando quais pedidos podem ou não ser atendidos, calculando o total vendido, a quantidade total vendida, o produto com maior valor de venda, o produto com menor estoque final e os estoques finais após os pedidos.
+
 void main(){
     List<String> produtos = [
     "Arroz",
@@ -35,7 +37,12 @@ void main(){
     List<String> naoPodeAtenderPedido = listarPedidosNaoAtendidos(produtos, estoques, quantidadesPedidas);
     double totalVendidoPedidos = calcularValorTotalVendas(precos, estoques, quantidadesPedidas);
     int quantiaTotal = calcularQuantidadeTotalVendida(estoques, quantidadesPedidas);
-    print("Pedidos atendidos: $podeAtenderPedido\nPedidos não atendidos: $naoPodeAtenderPedido\nTotal vendido: $totalVendidoPedidos\nQuantidade total vendida: $quantiaTotal");
+    int indiceMaiorVenda = encontrarIndiceMaiorValorVenda(precos, estoques, quantidadesPedidas);
+    String produtoMaiorVenda = produtos[indiceMaiorVenda];
+    int menorEstoqueIndice = encontrarIndiceMenorEstoqueFinal(estoques, quantidadesPedidas);
+    String menorEstoqueFinal = produtos[menorEstoqueIndice];
+    List<String> estoqueFinal = calcularEstoquesFinais(estoques, quantidadesPedidas, produtos);
+    print("Pedidos atendidos: $podeAtenderPedido\nPedidos não atendidos: $naoPodeAtenderPedido\nTotal vendido: $totalVendidoPedidos\nQuantidade total vendida: $quantiaTotal\nMaior valor de venda: $produtoMaiorVenda\nProduto com menor estoque final: $menorEstoqueFinal\nEstoques finais: $estoqueFinal");
 }
 
 List<String> listarPedidosAtendidos(List<String> produtos, List<int> estoques, List<int> quantidadesPedidas){
@@ -102,14 +109,68 @@ int calcularQuantidadeTotalVendida(List<int> estoques, List<int> quantidadesPedi
     return resultado;
 }
 
-// List<int> calcularEstoquesFinais(List<int> estoques, List<int> quantidadesPedidas){
+List<String> calcularEstoquesFinais(List<int> estoques, List<int> quantidadesPedidas, List<String> produtos){
+    int posicaoAtual = 0;
+    int posicao = 0;
+    List<String> printar = [];
+    List<int> resultadoEstoqueFinal = [];
+    for (int quantidadePedida in quantidadesPedidas){
+        if (quantidadePedida <= estoques[posicaoAtual]){
+            resultadoEstoqueFinal.add(estoques[posicaoAtual] - quantidadePedida);
+        }else{
+            resultadoEstoqueFinal.add(estoques[posicaoAtual]);
+        }
+        posicaoAtual += 1;
+    }
+    int estoqueFinal = resultadoEstoqueFinal[0];
+    for(String produto in produtos){
+        estoqueFinal = resultadoEstoqueFinal[posicao];
+        printar.add("\n$produto: $estoqueFinal");
+        posicao+=1;
+        
+    }
+    return printar;
+}
 
-// }
+int encontrarIndiceMaiorValorVenda(List<double> precos, List<int> estoques, List<int> quantidadesPedidas){
+    int posicaoAtual = 0;
+    double maiorValor = precos[0];
+    int posicaoMaiorValor = 0;
+    double maiores = 0;
+    double maiorValorVenda = 0;
+    for (int quantidadePedida in quantidadesPedidas){
+        if (quantidadePedida <= estoques[posicaoAtual]){
+            maiores = precos[posicaoAtual] * quantidadePedida;
+        }
+        if (maiores > maiorValorVenda){
+            maiorValorVenda = maiores;
+            posicaoMaiorValor = posicaoAtual;
+        }
+        posicaoAtual+=1;
+    }
+    return posicaoMaiorValor;
+}
 
-// int encontrarIndiceMaiorValorVenda(List<double> precos, List<int> estoques, List<int> quantidadesPedidas){
-
-// }
-
-// int encontrarIndiceMenorEstoqueFinal(List<int> estoques, List<int> quantidadesPedidas){
-
-// }
+int encontrarIndiceMenorEstoqueFinal(List<int> estoques, List<int> quantidadesPedidas){
+    int posicaoAtual = 0;
+    int posicao = 0;
+    int posicaoAtualResultado = 0;
+    List<int> resultadoEstoque = [];
+    for (int quantidadePedida in quantidadesPedidas){
+        if (quantidadePedida <= estoques[posicaoAtual]){
+            resultadoEstoque.add(estoques[posicaoAtual] - quantidadePedida);
+        }else{
+            resultadoEstoque.add(estoques[posicaoAtual]);
+        }
+        posicaoAtual += 1;
+    }
+    int menorEstoque = resultadoEstoque[0];
+    for (int resultado in resultadoEstoque){
+        if (resultado < menorEstoque){
+            menorEstoque = resultado;
+            posicao = posicaoAtualResultado;
+        }
+        posicaoAtualResultado+=1;
+    }
+    return posicao;
+}
