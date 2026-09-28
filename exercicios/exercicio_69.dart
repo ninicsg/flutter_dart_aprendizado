@@ -1,22 +1,5 @@
 import 'dart:io';
-
-class Registro {
-    String nome;
-    double numero;
-    String codigo;
-    Registro(this.nome, this.numero, this.codigo);
-    Map<String, dynamic> toMap(){
-        return{
-            'nome': nome,
-            'numero': numero,
-            'codigo': codigo,
-        };
-    }
-    factory Registro.fromMap(Map<String, dynamic> dados){
-        Registro registro = Registro(dados['nome'], dados['numero'], dados['codigo']);
-        return registro;
-    }
-}
+import 'registro.dart';
 
 void main(){
     print("Digite seu nome:");
