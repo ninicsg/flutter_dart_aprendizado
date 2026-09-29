@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:convert';
 import 'registro.dart';
 import 'funcoes_registro.dart';
-void main(){
+Future<void> main() async {
     List<Map<String, dynamic>> banco = carregarBanco();
     String opcaoMenu = '';
     while (opcaoMenu != '6') {
@@ -276,4 +276,16 @@ List<Map<String, dynamic>> carregarBanco() {
         List<Map<String, dynamic>> banco = [];
         return banco;
     }
+}
+
+
+Future<String> lerBancoDoArquivoAsync() async {
+  File arquivo = File('banco.json');
+  String texto = await arquivo.readAsString();
+  return texto;
+}
+
+Future<void> testarLeituraAsync() async {
+    String texto = await lerBancoDoArquivoAsync(); 
+    print(texto);
 }
