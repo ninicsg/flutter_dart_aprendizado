@@ -11,7 +11,7 @@ class Tela1 extends StatelessWidget {
   Widget build(BuildContext context) {
     void trocarTela() {
       Navigator.push(
-        // adiciona uma nova rota e vai para ela.
+        // adiciona uma nova camada e vai para ela.
         context,
         MaterialPageRoute(
           builder: (context) {
@@ -40,7 +40,7 @@ class Tela2 extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void removerTela() {
-      Navigator.pop(context); // remove a rota atual e volta para a anterior.
+      Navigator.pop(context); // remove a camada atual e volta para a anterior.
     }
 
     return MaterialApp(
