@@ -1,0 +1,12 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # Define onde os históricos em JSON das versões do banco serão salvos
+          schema_dir: drift_schemas/
+
+          # Mapeia as configurações específicas de cada banco de dados
+          databases:
+            # Caminho exato do seu arquivo Dart manual
+            path: lib/database/banco_dados.dart
