@@ -26,8 +26,40 @@ class Tarefas extends Table with TableInfo<Tarefas, TarefasData> {
     requiredDuringInsert: true,
     $customConstraints: 'NOT NULL',
   );
+  late final GeneratedColumn<int> teste3 = GeneratedColumn<int>(
+    'teste3',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (teste3 IN (0, 1))',
+    defaultValue: const CustomExpression('0'),
+  );
+  late final GeneratedColumn<int> teste33 = GeneratedColumn<int>(
+    'teste33',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    $customConstraints: 'NOT NULL DEFAULT 0 CHECK (teste33 IN (0, 1))',
+    defaultValue: const CustomExpression('0'),
+  );
+  late final GeneratedColumn<String> testeMigracao = GeneratedColumn<String>(
+    'teste_migracao',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints: 'NULL',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, descricao];
+  List<GeneratedColumn> get $columns => [
+    id,
+    descricao,
+    teste3,
+    teste33,
+    testeMigracao,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -47,6 +79,18 @@ class Tarefas extends Table with TableInfo<Tarefas, TarefasData> {
         DriftSqlType.string,
         data['${effectivePrefix}descricao'],
       )!,
+      teste3: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}teste3'],
+      )!,
+      teste33: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}teste33'],
+      )!,
+      testeMigracao: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}teste_migracao'],
+      ),
     );
   }
 
@@ -62,17 +106,39 @@ class Tarefas extends Table with TableInfo<Tarefas, TarefasData> {
 class TarefasData extends DataClass implements Insertable<TarefasData> {
   final int id;
   final String descricao;
-  const TarefasData({required this.id, required this.descricao});
+  final int teste3;
+  final int teste33;
+  final String? testeMigracao;
+  const TarefasData({
+    required this.id,
+    required this.descricao,
+    required this.teste3,
+    required this.teste33,
+    this.testeMigracao,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['descricao'] = Variable<String>(descricao);
+    map['teste3'] = Variable<int>(teste3);
+    map['teste33'] = Variable<int>(teste33);
+    if (!nullToAbsent || testeMigracao != null) {
+      map['teste_migracao'] = Variable<String>(testeMigracao);
+    }
     return map;
   }
 
   TarefasCompanion toCompanion(bool nullToAbsent) {
-    return TarefasCompanion(id: Value(id), descricao: Value(descricao));
+    return TarefasCompanion(
+      id: Value(id),
+      descricao: Value(descricao),
+      teste3: Value(teste3),
+      teste33: Value(teste33),
+      testeMigracao: testeMigracao == null && nullToAbsent
+          ? const Value.absent()
+          : Value(testeMigracao),
+    );
   }
 
   factory TarefasData.fromJson(
@@ -83,6 +149,9 @@ class TarefasData extends DataClass implements Insertable<TarefasData> {
     return TarefasData(
       id: serializer.fromJson<int>(json['id']),
       descricao: serializer.fromJson<String>(json['descricao']),
+      teste3: serializer.fromJson<int>(json['teste3']),
+      teste33: serializer.fromJson<int>(json['teste33']),
+      testeMigracao: serializer.fromJson<String?>(json['testeMigracao']),
     );
   }
   @override
@@ -91,15 +160,36 @@ class TarefasData extends DataClass implements Insertable<TarefasData> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'descricao': serializer.toJson<String>(descricao),
+      'teste3': serializer.toJson<int>(teste3),
+      'teste33': serializer.toJson<int>(teste33),
+      'testeMigracao': serializer.toJson<String?>(testeMigracao),
     };
   }
 
-  TarefasData copyWith({int? id, String? descricao}) =>
-      TarefasData(id: id ?? this.id, descricao: descricao ?? this.descricao);
+  TarefasData copyWith({
+    int? id,
+    String? descricao,
+    int? teste3,
+    int? teste33,
+    Value<String?> testeMigracao = const Value.absent(),
+  }) => TarefasData(
+    id: id ?? this.id,
+    descricao: descricao ?? this.descricao,
+    teste3: teste3 ?? this.teste3,
+    teste33: teste33 ?? this.teste33,
+    testeMigracao: testeMigracao.present
+        ? testeMigracao.value
+        : this.testeMigracao,
+  );
   TarefasData copyWithCompanion(TarefasCompanion data) {
     return TarefasData(
       id: data.id.present ? data.id.value : this.id,
       descricao: data.descricao.present ? data.descricao.value : this.descricao,
+      teste3: data.teste3.present ? data.teste3.value : this.teste3,
+      teste33: data.teste33.present ? data.teste33.value : this.teste33,
+      testeMigracao: data.testeMigracao.present
+          ? data.testeMigracao.value
+          : this.testeMigracao,
     );
   }
 
@@ -107,46 +197,77 @@ class TarefasData extends DataClass implements Insertable<TarefasData> {
   String toString() {
     return (StringBuffer('TarefasData(')
           ..write('id: $id, ')
-          ..write('descricao: $descricao')
+          ..write('descricao: $descricao, ')
+          ..write('teste3: $teste3, ')
+          ..write('teste33: $teste33, ')
+          ..write('testeMigracao: $testeMigracao')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, descricao);
+  int get hashCode =>
+      Object.hash(id, descricao, teste3, teste33, testeMigracao);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is TarefasData &&
           other.id == this.id &&
-          other.descricao == this.descricao);
+          other.descricao == this.descricao &&
+          other.teste3 == this.teste3 &&
+          other.teste33 == this.teste33 &&
+          other.testeMigracao == this.testeMigracao);
 }
 
 class TarefasCompanion extends UpdateCompanion<TarefasData> {
   final Value<int> id;
   final Value<String> descricao;
+  final Value<int> teste3;
+  final Value<int> teste33;
+  final Value<String?> testeMigracao;
   const TarefasCompanion({
     this.id = const Value.absent(),
     this.descricao = const Value.absent(),
+    this.teste3 = const Value.absent(),
+    this.teste33 = const Value.absent(),
+    this.testeMigracao = const Value.absent(),
   });
   TarefasCompanion.insert({
     this.id = const Value.absent(),
     required String descricao,
+    this.teste3 = const Value.absent(),
+    this.teste33 = const Value.absent(),
+    this.testeMigracao = const Value.absent(),
   }) : descricao = Value(descricao);
   static Insertable<TarefasData> custom({
     Expression<int>? id,
     Expression<String>? descricao,
+    Expression<int>? teste3,
+    Expression<int>? teste33,
+    Expression<String>? testeMigracao,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (descricao != null) 'descricao': descricao,
+      if (teste3 != null) 'teste3': teste3,
+      if (teste33 != null) 'teste33': teste33,
+      if (testeMigracao != null) 'teste_migracao': testeMigracao,
     });
   }
 
-  TarefasCompanion copyWith({Value<int>? id, Value<String>? descricao}) {
+  TarefasCompanion copyWith({
+    Value<int>? id,
+    Value<String>? descricao,
+    Value<int>? teste3,
+    Value<int>? teste33,
+    Value<String?>? testeMigracao,
+  }) {
     return TarefasCompanion(
       id: id ?? this.id,
       descricao: descricao ?? this.descricao,
+      teste3: teste3 ?? this.teste3,
+      teste33: teste33 ?? this.teste33,
+      testeMigracao: testeMigracao ?? this.testeMigracao,
     );
   }
 
@@ -159,6 +280,15 @@ class TarefasCompanion extends UpdateCompanion<TarefasData> {
     if (descricao.present) {
       map['descricao'] = Variable<String>(descricao.value);
     }
+    if (teste3.present) {
+      map['teste3'] = Variable<int>(teste3.value);
+    }
+    if (teste33.present) {
+      map['teste33'] = Variable<int>(teste33.value);
+    }
+    if (testeMigracao.present) {
+      map['teste_migracao'] = Variable<String>(testeMigracao.value);
+    }
     return map;
   }
 
@@ -166,7 +296,10 @@ class TarefasCompanion extends UpdateCompanion<TarefasData> {
   String toString() {
     return (StringBuffer('TarefasCompanion(')
           ..write('id: $id, ')
-          ..write('descricao: $descricao')
+          ..write('descricao: $descricao, ')
+          ..write('teste3: $teste3, ')
+          ..write('teste33: $teste33, ')
+          ..write('testeMigracao: $testeMigracao')
           ..write(')'))
         .toString();
   }

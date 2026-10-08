@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import 'package:drift_flutter/drift_flutter.dart';
 
+import 'banco_dados.steps.dart';
 
 part 'banco_dados.g.dart';
 
@@ -16,6 +17,7 @@ class Tarefas extends Table {
 
   TextColumn get testeMigracao => text().nullable()();
 
+  BoolColumn get concluida => boolean().withDefault(const Constant(false))();
 }
 
 @DriftDatabase(tables: [Tarefas])
@@ -34,7 +36,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
   // Esse número deve ser aumentado manualmente
 
   @override
@@ -43,6 +45,13 @@ class AppDatabase extends _$AppDatabase {
       onCreate: (m) async {
         await m.createAll();
       },
+      onUpgrade: stepByStep(
+        from1To2: (m, schema) async {
+          await m.addColumn(schema.tarefas, schema.tarefas.concluida);
+        },
+
+        from2To3: (m, schema) async {},
+      ),
     );
   }
 }
