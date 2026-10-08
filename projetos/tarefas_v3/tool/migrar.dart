@@ -73,7 +73,7 @@ Future<void> main(List<String> argumentos) async {
     // O $ permite colocar o valor da variável dentro da String.
     // Antes: int get schemaVersion => 3;
     // Depois: int get schemaVersion => 4;
-    'int get schemaVersion => $novaVersao',
+    'int get schemaVersion => $novaVersao;',
   );
   // Até agora, só alteramos o texto que está na memória.
   // Aqui realmente salvamos o novo conteúdo no arquivo.
@@ -150,8 +150,8 @@ Future<void> main(List<String> argumentos) async {
     // Verificamos se essa migração já existe no arquivo,
     // para não criar duas vezes a mesma função.
     if (codigoBanco.contains('$nomeMigracao:')) {
-    print('Essa migração já existe!');
-    return;
+        print('Essa migração já existe!');
+        return;
     }
 
     // Aqui montamos o código que será adicionado no stepByStep.
@@ -159,7 +159,7 @@ Future<void> main(List<String> argumentos) async {
 
     var novaMigracao = '''
         $nomeMigracao: (m, schema) async {
-        $operacoes
+            $operacoes
         },
     ''';
 
@@ -167,8 +167,8 @@ Future<void> main(List<String> argumentos) async {
     var inicio = codigoBanco.indexOf('stepByStep(');
 
     if (inicio == -1) {
-    print('stepByStep não encontrado!');
-    exit(1);
+        print('stepByStep não encontrado!');
+        exit(1);
     }
 
     // Procuramos o fechamento do stepByStep,
@@ -192,8 +192,8 @@ Future<void> main(List<String> argumentos) async {
     }
 
     if (fim == -1) {
-    print('Não foi possível encontrar o fim do stepByStep!');
-    exit(1);
+        print('Não foi possível encontrar o fim do stepByStep!');
+        exit(1);
     }
 
     // Adicionamos a nova migração antes do fechamento.
@@ -203,14 +203,22 @@ Future<void> main(List<String> argumentos) async {
 
     // Salvamos o arquivo com a migração adicionada.
     await arquivo.writeAsString(codigoBanco);
+    var formatador = await Process.run(
+        'dart',
+        ['format', arquivo.path],
+    );
 
+    if (formatador.exitCode != 0) {
+        print('Erro ao formatar o arquivo!');
+        exit(1);
+    }
     print('Migração $nomeMigracao adicionada automaticamente!');
 }
 
 Future<List<String>> descobrirColunas(File arquivo) async {
   var resultado = await Process.run(
     'git',
-    ['show', 'HEAD:${arquivo.path}'],
+    ['show', 'HEAD:./${arquivo.path}'],
   );
 
   if (resultado.exitCode != 0) {

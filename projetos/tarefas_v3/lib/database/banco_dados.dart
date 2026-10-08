@@ -2,8 +2,6 @@ import 'package:drift/drift.dart';
 
 import 'package:drift_flutter/drift_flutter.dart';
 
-import 'banco_dados.steps.dart';
-// Essa linha deve ser adicionada manualmente
 
 part 'banco_dados.g.dart';
 
@@ -17,6 +15,7 @@ class Tarefas extends Table {
   BoolColumn get teste33 => boolean().withDefault(const Constant(false))();
 
   TextColumn get testeMigracao => text().nullable()();
+
 }
 
 @DriftDatabase(tables: [Tarefas])
@@ -35,26 +34,15 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 1;
   // Esse número deve ser aumentado manualmente
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
-      onUpgrade: stepByStep(
-        from1To2: (m, schema) async {
-          await m.addColumn(schema.tarefas, schema.tarefas.teste3);
-        },
-
-        from2To3: (m, schema) async {
-          await m.addColumn(schema.tarefas, schema.tarefas.teste33);
-        },
-
-        from3To4: (m, schema) async {
-          await m.addColumn(schema.tarefas, schema.tarefas.testeMigracao);
-        },
-        // Essas propriedades from1To2 from2To3... devem ser adicionadas manualmente após rodar o make-migrations
-      ),
+      onCreate: (m) async {
+        await m.createAll();
+      },
     );
   }
 }

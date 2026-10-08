@@ -47,6 +47,44 @@
                 }
               }
             ]
+          },
+          {
+            "name": "teste3",
+            "getter_name": "teste3",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"teste3\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"teste3\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "teste33",
+            "getter_name": "teste33",
+            "moor_type": "bool",
+            "nullable": false,
+            "customConstraints": null,
+            "defaultConstraints": "CHECK (\"teste33\" IN (0, 1))",
+            "dialectAwareDefaultConstraints": {
+              "sqlite": "CHECK (\"teste33\" IN (0, 1))"
+            },
+            "default_dart": "const CustomExpression('0')",
+            "default_client_dart": null,
+            "dsl_features": []
+          },
+          {
+            "name": "teste_migracao",
+            "getter_name": "testeMigracao",
+            "moor_type": "string",
+            "nullable": true,
+            "customConstraints": null,
+            "default_dart": null,
+            "default_client_dart": null,
+            "dsl_features": []
           }
         ],
         "is_virtual": false,
@@ -61,7 +99,7 @@
       "sql": [
         {
           "dialect": "sqlite",
-          "sql": "CREATE TABLE IF NOT EXISTS \"tarefas\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"descricao\" TEXT NOT NULL);"
+          "sql": "CREATE TABLE IF NOT EXISTS \"tarefas\" (\"id\" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, \"descricao\" TEXT NOT NULL, \"teste3\" INTEGER NOT NULL DEFAULT 0 CHECK (\"teste3\" IN (0, 1)), \"teste33\" INTEGER NOT NULL DEFAULT 0 CHECK (\"teste33\" IN (0, 1)), \"teste_migracao\" TEXT NULL);"
         }
       ]
     }
