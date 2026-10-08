@@ -15,6 +15,8 @@ class Tarefas extends Table {
   BoolColumn get teste3 => boolean().withDefault(const Constant(false))();
 
   BoolColumn get teste33 => boolean().withDefault(const Constant(false))();
+
+  TextColumn get testeMigracao => text().nullable()();
 }
 
 @DriftDatabase(tables: [Tarefas])
@@ -33,7 +35,7 @@ class AppDatabase extends _$AppDatabase {
       );
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
   // Esse número deve ser aumentado manualmente
 
   @override
@@ -46,6 +48,10 @@ class AppDatabase extends _$AppDatabase {
 
         from2To3: (m, schema) async {
           await m.addColumn(schema.tarefas, schema.tarefas.teste33);
+        },
+
+        from3To4: (m, schema) async {
+          await m.addColumn(schema.tarefas, schema.tarefas.testeMigracao);
         },
         // Essas propriedades from1To2 from2To3... devem ser adicionadas manualmente após rodar o make-migrations
       ),

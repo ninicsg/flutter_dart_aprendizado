@@ -97,9 +97,85 @@ i1.GeneratedColumn<int> _column_3(String aliasedName) =>
       $customConstraints: 'NOT NULL DEFAULT 0 CHECK (teste33 IN (0, 1))',
       defaultValue: const i1.CustomExpression('0'),
     );
+
+final class Schema4 extends i0.VersionedSchema {
+  Schema4({required super.database}) : super(version: 4);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [tarefas];
+  late final Shape1 tarefas = Shape1(
+    source: i0.VersionedTable(
+      entityName: 'tarefas',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [_column_0, _column_1, _column_2, _column_3],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+final class Schema5 extends i0.VersionedSchema {
+  Schema5({required super.database}) : super(version: 5);
+  @override
+  late final List<i1.DatabaseSchemaEntity> entities = [tarefas];
+  late final Shape2 tarefas = Shape2(
+    source: i0.VersionedTable(
+      entityName: 'tarefas',
+      withoutRowId: false,
+      isStrict: false,
+      tableConstraints: [],
+      columns: [
+        _column_0,
+        _column_1,
+        _column_2,
+        _column_3,
+        _column_4,
+        _column_5,
+      ],
+      attachedDatabase: database,
+    ),
+    alias: null,
+  );
+}
+
+class Shape2 extends i0.VersionedTable {
+  Shape2({required super.source, required super.alias}) : super.aliased();
+  i1.GeneratedColumn<int> get id =>
+      columnsByName['id']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get descricao =>
+      columnsByName['descricao']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get teste3 =>
+      columnsByName['teste3']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<int> get teste33 =>
+      columnsByName['teste33']! as i1.GeneratedColumn<int>;
+  i1.GeneratedColumn<String> get testeMigracao =>
+      columnsByName['teste_migracao']! as i1.GeneratedColumn<String>;
+  i1.GeneratedColumn<int> get prioridade =>
+      columnsByName['prioridade']! as i1.GeneratedColumn<int>;
+}
+
+i1.GeneratedColumn<String> _column_4(String aliasedName) =>
+    i1.GeneratedColumn<String>(
+      'teste_migracao',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.string,
+      $customConstraints: 'NULL',
+    );
+i1.GeneratedColumn<int> _column_5(String aliasedName) =>
+    i1.GeneratedColumn<int>(
+      'prioridade',
+      aliasedName,
+      true,
+      type: i1.DriftSqlType.int,
+      $customConstraints: 'NULL',
+    );
 i0.MigrationStepWithVersion migrationSteps({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
 }) {
   return (currentVersion, database) async {
     switch (currentVersion) {
@@ -113,6 +189,16 @@ i0.MigrationStepWithVersion migrationSteps({
         final migrator = i1.Migrator(database, schema);
         await from2To3(migrator, schema);
         return 3;
+      case 3:
+        final schema = Schema4(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from3To4(migrator, schema);
+        return 4;
+      case 4:
+        final schema = Schema5(database: database);
+        final migrator = i1.Migrator(database, schema);
+        await from4To5(migrator, schema);
+        return 5;
       default:
         throw ArgumentError.value('Unknown migration from $currentVersion');
     }
@@ -122,6 +208,13 @@ i0.MigrationStepWithVersion migrationSteps({
 i1.OnUpgrade stepByStep({
   required Future<void> Function(i1.Migrator m, Schema2 schema) from1To2,
   required Future<void> Function(i1.Migrator m, Schema3 schema) from2To3,
+  required Future<void> Function(i1.Migrator m, Schema4 schema) from3To4,
+  required Future<void> Function(i1.Migrator m, Schema5 schema) from4To5,
 }) => i0.VersionedSchema.stepByStepHelper(
-  step: migrationSteps(from1To2: from1To2, from2To3: from2To3),
+  step: migrationSteps(
+    from1To2: from1To2,
+    from2To3: from2To3,
+    from3To4: from3To4,
+    from4To5: from4To5,
+  ),
 );

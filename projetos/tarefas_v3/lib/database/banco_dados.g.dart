@@ -64,8 +64,25 @@ class $TarefasTable extends Tarefas with TableInfo<$TarefasTable, Tarefa> {
     ),
     defaultValue: const Constant(false),
   );
+  static const VerificationMeta _testeMigracaoMeta = const VerificationMeta(
+    'testeMigracao',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, descricao, teste3, teste33];
+  late final GeneratedColumn<String> testeMigracao = GeneratedColumn<String>(
+    'teste_migracao',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    descricao,
+    teste3,
+    teste33,
+    testeMigracao,
+  ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -101,6 +118,15 @@ class $TarefasTable extends Tarefas with TableInfo<$TarefasTable, Tarefa> {
         teste33.isAcceptableOrUnknown(data['teste33']!, _teste33Meta),
       );
     }
+    if (data.containsKey('teste_migracao')) {
+      context.handle(
+        _testeMigracaoMeta,
+        testeMigracao.isAcceptableOrUnknown(
+          data['teste_migracao']!,
+          _testeMigracaoMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -126,6 +152,10 @@ class $TarefasTable extends Tarefas with TableInfo<$TarefasTable, Tarefa> {
         DriftSqlType.bool,
         data['${effectivePrefix}teste33'],
       )!,
+      testeMigracao: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}teste_migracao'],
+      ),
     );
   }
 
@@ -140,11 +170,13 @@ class Tarefa extends DataClass implements Insertable<Tarefa> {
   final String descricao;
   final bool teste3;
   final bool teste33;
+  final String? testeMigracao;
   const Tarefa({
     required this.id,
     required this.descricao,
     required this.teste3,
     required this.teste33,
+    this.testeMigracao,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -153,6 +185,9 @@ class Tarefa extends DataClass implements Insertable<Tarefa> {
     map['descricao'] = Variable<String>(descricao);
     map['teste3'] = Variable<bool>(teste3);
     map['teste33'] = Variable<bool>(teste33);
+    if (!nullToAbsent || testeMigracao != null) {
+      map['teste_migracao'] = Variable<String>(testeMigracao);
+    }
     return map;
   }
 
@@ -162,6 +197,9 @@ class Tarefa extends DataClass implements Insertable<Tarefa> {
       descricao: Value(descricao),
       teste3: Value(teste3),
       teste33: Value(teste33),
+      testeMigracao: testeMigracao == null && nullToAbsent
+          ? const Value.absent()
+          : Value(testeMigracao),
     );
   }
 
@@ -175,6 +213,7 @@ class Tarefa extends DataClass implements Insertable<Tarefa> {
       descricao: serializer.fromJson<String>(json['descricao']),
       teste3: serializer.fromJson<bool>(json['teste3']),
       teste33: serializer.fromJson<bool>(json['teste33']),
+      testeMigracao: serializer.fromJson<String?>(json['testeMigracao']),
     );
   }
   @override
@@ -185,22 +224,34 @@ class Tarefa extends DataClass implements Insertable<Tarefa> {
       'descricao': serializer.toJson<String>(descricao),
       'teste3': serializer.toJson<bool>(teste3),
       'teste33': serializer.toJson<bool>(teste33),
+      'testeMigracao': serializer.toJson<String?>(testeMigracao),
     };
   }
 
-  Tarefa copyWith({int? id, String? descricao, bool? teste3, bool? teste33}) =>
-      Tarefa(
-        id: id ?? this.id,
-        descricao: descricao ?? this.descricao,
-        teste3: teste3 ?? this.teste3,
-        teste33: teste33 ?? this.teste33,
-      );
+  Tarefa copyWith({
+    int? id,
+    String? descricao,
+    bool? teste3,
+    bool? teste33,
+    Value<String?> testeMigracao = const Value.absent(),
+  }) => Tarefa(
+    id: id ?? this.id,
+    descricao: descricao ?? this.descricao,
+    teste3: teste3 ?? this.teste3,
+    teste33: teste33 ?? this.teste33,
+    testeMigracao: testeMigracao.present
+        ? testeMigracao.value
+        : this.testeMigracao,
+  );
   Tarefa copyWithCompanion(TarefasCompanion data) {
     return Tarefa(
       id: data.id.present ? data.id.value : this.id,
       descricao: data.descricao.present ? data.descricao.value : this.descricao,
       teste3: data.teste3.present ? data.teste3.value : this.teste3,
       teste33: data.teste33.present ? data.teste33.value : this.teste33,
+      testeMigracao: data.testeMigracao.present
+          ? data.testeMigracao.value
+          : this.testeMigracao,
     );
   }
 
@@ -210,13 +261,15 @@ class Tarefa extends DataClass implements Insertable<Tarefa> {
           ..write('id: $id, ')
           ..write('descricao: $descricao, ')
           ..write('teste3: $teste3, ')
-          ..write('teste33: $teste33')
+          ..write('teste33: $teste33, ')
+          ..write('testeMigracao: $testeMigracao')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, descricao, teste3, teste33);
+  int get hashCode =>
+      Object.hash(id, descricao, teste3, teste33, testeMigracao);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -224,7 +277,8 @@ class Tarefa extends DataClass implements Insertable<Tarefa> {
           other.id == this.id &&
           other.descricao == this.descricao &&
           other.teste3 == this.teste3 &&
-          other.teste33 == this.teste33);
+          other.teste33 == this.teste33 &&
+          other.testeMigracao == this.testeMigracao);
 }
 
 class TarefasCompanion extends UpdateCompanion<Tarefa> {
@@ -232,29 +286,34 @@ class TarefasCompanion extends UpdateCompanion<Tarefa> {
   final Value<String> descricao;
   final Value<bool> teste3;
   final Value<bool> teste33;
+  final Value<String?> testeMigracao;
   const TarefasCompanion({
     this.id = const Value.absent(),
     this.descricao = const Value.absent(),
     this.teste3 = const Value.absent(),
     this.teste33 = const Value.absent(),
+    this.testeMigracao = const Value.absent(),
   });
   TarefasCompanion.insert({
     this.id = const Value.absent(),
     required String descricao,
     this.teste3 = const Value.absent(),
     this.teste33 = const Value.absent(),
+    this.testeMigracao = const Value.absent(),
   }) : descricao = Value(descricao);
   static Insertable<Tarefa> custom({
     Expression<int>? id,
     Expression<String>? descricao,
     Expression<bool>? teste3,
     Expression<bool>? teste33,
+    Expression<String>? testeMigracao,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (descricao != null) 'descricao': descricao,
       if (teste3 != null) 'teste3': teste3,
       if (teste33 != null) 'teste33': teste33,
+      if (testeMigracao != null) 'teste_migracao': testeMigracao,
     });
   }
 
@@ -263,12 +322,14 @@ class TarefasCompanion extends UpdateCompanion<Tarefa> {
     Value<String>? descricao,
     Value<bool>? teste3,
     Value<bool>? teste33,
+    Value<String?>? testeMigracao,
   }) {
     return TarefasCompanion(
       id: id ?? this.id,
       descricao: descricao ?? this.descricao,
       teste3: teste3 ?? this.teste3,
       teste33: teste33 ?? this.teste33,
+      testeMigracao: testeMigracao ?? this.testeMigracao,
     );
   }
 
@@ -287,6 +348,9 @@ class TarefasCompanion extends UpdateCompanion<Tarefa> {
     if (teste33.present) {
       map['teste33'] = Variable<bool>(teste33.value);
     }
+    if (testeMigracao.present) {
+      map['teste_migracao'] = Variable<String>(testeMigracao.value);
+    }
     return map;
   }
 
@@ -296,7 +360,8 @@ class TarefasCompanion extends UpdateCompanion<Tarefa> {
           ..write('id: $id, ')
           ..write('descricao: $descricao, ')
           ..write('teste3: $teste3, ')
-          ..write('teste33: $teste33')
+          ..write('teste33: $teste33, ')
+          ..write('testeMigracao: $testeMigracao')
           ..write(')'))
         .toString();
   }
@@ -318,12 +383,14 @@ typedef $$TarefasTableCreateCompanionBuilder = TarefasCompanion Function({
   required String descricao,
   Value<bool> teste3,
   Value<bool> teste33,
+  Value<String?> testeMigracao,
 });
 typedef $$TarefasTableUpdateCompanionBuilder = TarefasCompanion Function({
   Value<int> id,
   Value<String> descricao,
   Value<bool> teste3,
   Value<bool> teste33,
+  Value<String?> testeMigracao,
 });
 
 class $$TarefasTableFilterComposer
@@ -352,6 +419,11 @@ class $$TarefasTableFilterComposer
 
   ColumnFilters<bool> get teste33 => $composableBuilder(
     column: $table.teste33,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get testeMigracao => $composableBuilder(
+    column: $table.testeMigracao,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -384,6 +456,11 @@ class $$TarefasTableOrderingComposer
     column: $table.teste33,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get testeMigracao => $composableBuilder(
+    column: $table.testeMigracao,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$TarefasTableAnnotationComposer
@@ -406,6 +483,11 @@ class $$TarefasTableAnnotationComposer
 
   GeneratedColumn<bool> get teste33 =>
       $composableBuilder(column: $table.teste33, builder: (column) => column);
+
+  GeneratedColumn<String> get testeMigracao => $composableBuilder(
+    column: $table.testeMigracao,
+    builder: (column) => column,
+  );
 }
 
 class $$TarefasTableTableManager
@@ -440,11 +522,13 @@ class $$TarefasTableTableManager
                 Value<String> descricao = const Value.absent(),
                 Value<bool> teste3 = const Value.absent(),
                 Value<bool> teste33 = const Value.absent(),
+                Value<String?> testeMigracao = const Value.absent(),
               }) => TarefasCompanion(
                 id: id,
                 descricao: descricao,
                 teste3: teste3,
                 teste33: teste33,
+                testeMigracao: testeMigracao,
               ),
           createCompanionCallback:
               ({
@@ -452,11 +536,13 @@ class $$TarefasTableTableManager
                 required String descricao,
                 Value<bool> teste3 = const Value.absent(),
                 Value<bool> teste33 = const Value.absent(),
+                Value<String?> testeMigracao = const Value.absent(),
               }) => TarefasCompanion.insert(
                 id: id,
                 descricao: descricao,
                 teste3: teste3,
                 teste33: teste33,
+                testeMigracao: testeMigracao,
               ),
           withReferenceMapper: (p0) => p0
               .map(
